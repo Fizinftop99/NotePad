@@ -1,6 +1,5 @@
 package sample;
 
-import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -10,11 +9,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.List;
 
 public class NotePadView extends VBox {
     private NotePadViewModel viewModel;
@@ -22,55 +16,42 @@ public class NotePadView extends VBox {
     private TextArea textArea;
     public NotePadView(NotePadViewModel viewModel) {
         this.viewModel = viewModel;
-        //menuBar = new MenuBar();
         textArea = new TextArea();
         menuBar = initMenuBar();
-       /* textArea.setOnMouseClicked(event -> {
-            FileChooser fileChooser = new FileChooser();
-            File file = fileChooser.showOpenDialog(viewModel.getStage());
-            try {
-                List<String> all = FileUtils.readAll(file);
-                StringBuilder sb = new StringBuilder();
-
-                all.forEach(sb::append);
-                textArea.setText(sb.toString());
-            } catch (FileNotFoundException | NullPointerException e) {
-                throw new IllegalArgumentException("Wrong path");
-            }
-        });
-        */
-        //initMenuBar();
         getChildren().addAll(menuBar, textArea);
         VBox.setVgrow(textArea, Priority.ALWAYS);
-        //stage.setScene(new Scene(VBox));
+    }
+
+    private MenuBar initMenuBar() {
+        Menu file = new Menu("File");
+        file.getItems().addAll(createNewButton(), createOpenButton(), createSaveButton(), createSaveAsButton());
+        return new MenuBar(file);
+    }
+
+    private MenuItem createNewButton() {
+        MenuItem create = new MenuItem("New");
+        create.setOnAction(event -> viewModel.save());
+        create.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_ANY));
+        return create;
     }
 
     private MenuItem createOpenButton() {
-        MenuItem open = new MenuItem("Открыть..");
+        MenuItem open = new MenuItem("Open...");
         open.setOnAction(event -> viewModel.open());
         open.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_ANY));
         return open;
     }
 
-    private MenuBar initMenuBar() {
-        Menu file = new Menu("File");
-        file.getItems().addAll(createOpenButton());
-        /*MenuItem open = new MenuItem( "Open");
-        open.setOnAction(event -> {
-            FileChooser fileChooser = new FileChooser();
-            File file = fileChooser.showOpenDialog(viewModel.getStage());
-            if(file != null) try {
-                List<String> all = FileUtils.readAll(file);
-                StringBuilder sb = new StringBuilder();
-                all.forEach(sb::append);
-                textArea.setText(sb.toString());
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException("Wrong path");
-            }
-        });*/
-        //Menu fileMenu = new Menu("File");
-        //fileMenu.getItems().add(open);
-        //menuBar.getMenus().add(fileMenu);
-        return new MenuBar(file);
+    private MenuItem createSaveButton() {
+        MenuItem save = new MenuItem("Save");
+        save.setOnAction(event -> viewModel.save());
+        save.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY));
+        return save;
+    }
+
+    private MenuItem createSaveAsButton() {
+        MenuItem saveAs = new MenuItem("Save as...");
+        saveAs.setOnAction(event -> viewModel.saveAs());
+        return saveAs;
     }
 }

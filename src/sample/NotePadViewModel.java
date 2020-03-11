@@ -15,16 +15,31 @@ public class NotePadViewModel {
     private TextArea textArea;
     private String loggedText = "";
 
-    public Stage getStage() {
-        return stage;
-    }
-
     public NotePadViewModel(Stage stage) {
         this.stage = stage;
     }
 
-    void onSave(List<String> lines, String name) {
-        FileUtils.writeAll(lines, name);
+    void save() {
+        if (currentFile != null) {
+            FileManager.save(currentFile, textArea.getText());
+            logText();
+        } else {
+            saveAs();
+        }
+    }
+
+    void saveAs() {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
+        fileChooser.getExtensionFilters().add(extensionFilter);
+        Path openedFile = fileChooser.showSaveDialog(stage).toPath();
+        if (openedFile != null) {
+            currentFile = openedFile;
+            FileManager.save(currentFile,
+                    textArea.getText().replaceAll("\n", lineSeparator()));
+        }
+        updateTitle();
+        updateCondition();
     }
 
     void open() {

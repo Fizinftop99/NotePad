@@ -1,7 +1,5 @@
 package sample;
 
-import javafx.scene.image.Image;
-
 import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,14 +23,5 @@ public class FileManager {
             throw new UncheckedIOException(ioEx);
         }
         return readLines;
-    }
-    public static Image readImage(String imagePath) {
-        try {
-            FileInputStream inputImageStream = new FileInputStream(imagePath);
-            return new Image(inputImageStream);
-
-        } catch (FileNotFoundException noImage) {
-            throw new IllegalArgumentException("No such image");
-        }
     }
 }
