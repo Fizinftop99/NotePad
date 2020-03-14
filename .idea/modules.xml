@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FX2.iml" filepath="$PROJECT_DIR$/FX2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/NotePad.iml" filepath="$PROJECT_DIR$/NotePad.iml" />
     </modules>
   </component>
 </project>

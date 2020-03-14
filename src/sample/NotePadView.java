@@ -9,6 +9,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,24 +20,24 @@ public class NotePadView extends VBox {
     private NotePadViewModel viewModel;
     private TextArea textArea;
 
-    public NotePadView(NotePadViewModel viewModel) {
-        this.viewModel = viewModel;
+    public NotePadView(NotePadViewModel viewModel, Stage stage) {
+            this.viewModel = viewModel;
         textArea = new TextArea();
-        MenuBar menuBar = initMenuBar();
+        MenuBar menuBar = initMenuBar(stage);
         getChildren().addAll(menuBar, textArea);
         VBox.setVgrow(textArea, Priority.ALWAYS);
     }
 
-    private MenuBar initMenuBar() {
+    private MenuBar initMenuBar(Stage stage) {
         Menu file = new Menu("File");
-        file.getItems().addAll(createOpenItem(), createSaveItem(), createSaveAsItem());
+        file.getItems().addAll(createOpenItem(stage), createSaveItem(stage), createSaveAsItem(stage));
         return new MenuBar(file);
     }
 
-    private MenuItem createOpenItem() {
+    private MenuItem createOpenItem(Stage stage) {
         MenuItem open = new MenuItem("Open...");
         open.setOnAction(actionEvent -> {
-            Optional<List<String>> optionalStrings = viewModel.open();
+            Optional<List<String>> optionalStrings = viewModel.open(stage);
             if (optionalStrings.isEmpty())
                 return;
             refill(optionalStrings.get());
@@ -45,16 +46,16 @@ public class NotePadView extends VBox {
         return open;
     }
 
-    private MenuItem createSaveItem() {
+    private MenuItem createSaveItem(Stage stage) {
         MenuItem save = new MenuItem("Save");
-        save.setOnAction(event -> viewModel.save(textArea.getText()));
+        save.setOnAction(event -> viewModel.save(stage, textArea.getText()));
         save.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY));
         return save;
     }
 
-    private MenuItem createSaveAsItem() {
+    private MenuItem createSaveAsItem(Stage stage) {
         MenuItem saveAs = new MenuItem("Save as...");
-        saveAs.setOnAction(event -> viewModel.saveAs(textArea.getText()));
+        saveAs.setOnAction(event -> viewModel.saveAs(stage, textArea.getText()));
         return saveAs;
     }
 

@@ -13,34 +13,29 @@ import java.util.Optional;
 import static java.lang.System.lineSeparator;
 
 public class NotePadViewModel {
-    private Stage stage;
     private Path currentPath;
 
-    public NotePadViewModel(Stage stage) {
-        this.stage = stage;
-    }
-
-    void save(String savedText) {
+    void save(Stage stage, String savedText) {
         if (currentPath != null) {
             FileManager.save(currentPath, savedText);
         } else {
-            saveAs(savedText);
+            saveAs(stage, savedText);
         }
     }
 
-    void saveAs(String savedText) {
+    void saveAs(Stage stage, String savedText) {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
         fileChooser.getExtensionFilters().add(extensionFilter);
-        Path openedFile = fileChooser.showSaveDialog(stage).toPath();
+        File openedFile = fileChooser.showSaveDialog(stage);
         if (openedFile != null) {
-            currentPath = openedFile;
+            currentPath = openedFile.toPath();
             FileManager.save(currentPath, savedText.replaceAll("\n", lineSeparator()));
         }
-        updateTitle();
+        stage.setTitle(fileName());
     }
 
-    Optional<List<String>> open() {
+    Optional<List<String>> open(Stage stage) {
         FileChooser fileChooser = new FileChooser();
             File openedFile = fileChooser.showOpenDialog(stage);
             if (openedFile != null) {
@@ -51,19 +46,15 @@ public class NotePadViewModel {
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
-                updateTitle();
+                stage.setTitle(fileName());
                 return Optional.of(loggedText);
             }
         return Optional.empty();
     }
 
-    void updateTitle() {
-        stage.setTitle(fileName() + " — Блокнот");
-    }
-
     private String fileName() {
         if (currentPath == null) {
-            return "Безымянный";
+            return "NoName";
         }
         return currentPath.getFileName().toString();
     }
