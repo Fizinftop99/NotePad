@@ -1,9 +1,9 @@
 package sample;
 
-import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -14,16 +14,15 @@ import static java.lang.System.lineSeparator;
 
 public class NotePadViewModel {
     private Stage stage;
-    private Path currentFile;
-    private List<String> loggedText;
+    private Path currentPath;
 
     public NotePadViewModel(Stage stage) {
         this.stage = stage;
     }
 
     void save(String savedText) {
-        if (currentFile != null) {
-            FileManager.save(currentFile, savedText);
+        if (currentPath != null) {
+            FileManager.save(currentPath, savedText);
         } else {
             saveAs(savedText);
         }
@@ -35,25 +34,26 @@ public class NotePadViewModel {
         fileChooser.getExtensionFilters().add(extensionFilter);
         Path openedFile = fileChooser.showSaveDialog(stage).toPath();
         if (openedFile != null) {
-            currentFile = openedFile;
-            FileManager.save(currentFile, savedText.replaceAll("\n", lineSeparator()));
+            currentPath = openedFile;
+            FileManager.save(currentPath, savedText.replaceAll("\n", lineSeparator()));
         }
         updateTitle();
     }
 
     Optional<List<String>> open() {
         FileChooser fileChooser = new FileChooser();
-        Path openedFile = fileChooser.showOpenDialog(stage).toPath();
-        if (openedFile != null) {
-            currentFile = openedFile;
-            try {
-                loggedText = FileManager.readPath(currentFile);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+            File openedFile = fileChooser.showOpenDialog(stage);
+            if (openedFile != null) {
+                currentPath = openedFile.toPath();
+                List<String> loggedText;
+                try {
+                    loggedText = FileManager.readPath(currentPath);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+                updateTitle();
+                return Optional.of(loggedText);
             }
-            updateTitle();
-            return Optional.of(loggedText);
-        }
         return Optional.empty();
     }
 
@@ -62,9 +62,9 @@ public class NotePadViewModel {
     }
 
     private String fileName() {
-        if (currentFile == null) {
+        if (currentPath == null) {
             return "Безымянный";
         }
-        return currentFile.getFileName().toString();
+        return currentPath.getFileName().toString();
     }
 }

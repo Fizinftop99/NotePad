@@ -17,28 +17,20 @@ import static java.lang.System.lineSeparator;
 
 public class NotePadView extends VBox {
     private NotePadViewModel viewModel;
-    private MenuBar menuBar;
     private TextArea textArea;
 
     public NotePadView(NotePadViewModel viewModel) {
         this.viewModel = viewModel;
         textArea = new TextArea();
-        menuBar = initMenuBar();
+        MenuBar menuBar = initMenuBar();
         getChildren().addAll(menuBar, textArea);
         VBox.setVgrow(textArea, Priority.ALWAYS);
     }
 
     private MenuBar initMenuBar() {
         Menu file = new Menu("File");
-        file.getItems().addAll(createNewItem(), createOpenItem(), createSaveItem(), createSaveAsItem());
+        file.getItems().addAll(createOpenItem(), createSaveItem(), createSaveAsItem());
         return new MenuBar(file);
-    }
-
-    private MenuItem createNewItem() {
-        MenuItem create = new MenuItem("New");
-        create.setOnAction(event -> viewModel.save(textArea.getText()));
-        create.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_ANY));
-        return create;
     }
 
     private MenuItem createOpenItem() {
