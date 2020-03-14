@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.System.lineSeparator;
 
@@ -13,7 +14,7 @@ public class NotePadViewModel {
     private Stage stage;
     private Path currentFile;
     private TextArea textArea;
-    private String loggedText = "";
+    private List<String> loggedText;
 
     public NotePadViewModel(Stage stage) {
         this.stage = stage;
@@ -22,7 +23,7 @@ public class NotePadViewModel {
     void save() {
         if (currentFile != null) {
             FileManager.save(currentFile, textArea.getText());
-            logText();
+            //logText();
         } else {
             saveAs();
         }
@@ -35,34 +36,25 @@ public class NotePadViewModel {
         Path openedFile = fileChooser.showSaveDialog(stage).toPath();
         if (openedFile != null) {
             currentFile = openedFile;
-            FileManager.save(currentFile,
-                    textArea.getText().replaceAll("\n", lineSeparator()));
+            FileManager.save(currentFile, textArea.getText().replaceAll("\n", lineSeparator()));
         }
         updateTitle();
         updateCondition();
     }
 
-    void open() {
+    Optional<List<String>> open() {
         FileChooser fileChooser = new FileChooser();
         Path openedFile = fileChooser.showOpenDialog(stage).toPath();
         if (openedFile != null) {
-            System.out.println("RRReaded");
+            //System.out.println("RRReaded");
             currentFile = openedFile;
-            refill(FileManager.readPath(currentFile));
-            updateCondition();
+            loggedText = FileManager.readPath(currentFile);
+            updateTitle();
+            return Optional.of(loggedText);
         }
+        return Optional.empty();
     }
 
-    private void refill(List<String> contents) {
-        textArea.clear();
-        for (String line : contents) {
-            textArea.appendText(line + lineSeparator());
-        }
-    }
-
-    private void logText() {
-        loggedText = textArea.getText();
-    }
 
     void updateTitle() {
         stage.setTitle(fileName() + " — Блокнот");
@@ -76,7 +68,7 @@ public class NotePadViewModel {
     }
 
     private void updateCondition() {
-        logText();
+        //logText();
         updateTitle();
     }
 }

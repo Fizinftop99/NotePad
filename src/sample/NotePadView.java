@@ -10,6 +10,11 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
+import java.util.Optional;
+
+import static java.lang.System.lineSeparator;
+
 public class NotePadView extends VBox {
     private NotePadViewModel viewModel;
     private MenuBar menuBar;
@@ -24,34 +29,46 @@ public class NotePadView extends VBox {
 
     private MenuBar initMenuBar() {
         Menu file = new Menu("File");
-        file.getItems().addAll(createNewButton(), createOpenButton(), createSaveButton(), createSaveAsButton());
+        file.getItems().addAll(createNewItem(), createOpenItem(), createSaveItem(), createSaveAsItem());
         return new MenuBar(file);
     }
 
-    private MenuItem createNewButton() {
+    private MenuItem createNewItem() {
         MenuItem create = new MenuItem("New");
         create.setOnAction(event -> viewModel.save());
         create.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_ANY));
         return create;
     }
 
-    private MenuItem createOpenButton() {
+    private MenuItem createOpenItem() {
         MenuItem open = new MenuItem("Open...");
-        open.setOnAction(event -> viewModel.open());
+        open.setOnAction(actionEvent -> {
+            Optional<List<String>> optionalStrings = viewModel.open();
+            if (optionalStrings.isEmpty())
+                return;
+            refill(optionalStrings.get());
+        });
         open.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_ANY));
         return open;
     }
 
-    private MenuItem createSaveButton() {
+    private MenuItem createSaveItem() {
         MenuItem save = new MenuItem("Save");
         save.setOnAction(event -> viewModel.save());
         save.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY));
         return save;
     }
 
-    private MenuItem createSaveAsButton() {
+    private MenuItem createSaveAsItem() {
         MenuItem saveAs = new MenuItem("Save as...");
         saveAs.setOnAction(event -> viewModel.saveAs());
         return saveAs;
+    }
+
+    private void refill(List<String> contents) {
+        textArea.clear();
+        for (String line : contents) {
+            textArea.appendText(line + lineSeparator());
+        }
     }
 }
