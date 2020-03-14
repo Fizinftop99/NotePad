@@ -9,8 +9,9 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,24 +21,24 @@ public class NotePadView extends VBox {
     private NotePadViewModel viewModel;
     private TextArea textArea;
 
-    public NotePadView(NotePadViewModel viewModel, Stage stage) {
-            this.viewModel = viewModel;
+    public NotePadView(NotePadViewModel viewModel) {
+        this.viewModel = viewModel;
         textArea = new TextArea();
-        MenuBar menuBar = initMenuBar(stage);
+        MenuBar menuBar = initMenuBar();
         getChildren().addAll(menuBar, textArea);
         VBox.setVgrow(textArea, Priority.ALWAYS);
     }
 
-    private MenuBar initMenuBar(Stage stage) {
+    private MenuBar initMenuBar() {
         Menu file = new Menu("File");
-        file.getItems().addAll(createOpenItem(stage), createSaveItem(stage), createSaveAsItem(stage));
+        file.getItems().addAll(createOpenItem(), createSaveItem(), createSaveAsItem());
         return new MenuBar(file);
     }
 
-    private MenuItem createOpenItem(Stage stage) {
+    private MenuItem createOpenItem() {
         MenuItem open = new MenuItem("Open...");
         open.setOnAction(actionEvent -> {
-            Optional<List<String>> optionalStrings = viewModel.open(stage);
+            Optional<List<String>> optionalStrings = viewModel.open();
             if (optionalStrings.isEmpty())
                 return;
             refill(optionalStrings.get());
@@ -46,16 +47,20 @@ public class NotePadView extends VBox {
         return open;
     }
 
-    private MenuItem createSaveItem(Stage stage) {
+    private MenuItem createSaveItem() {
         MenuItem save = new MenuItem("Save");
-        save.setOnAction(event -> viewModel.save(stage, textArea.getText()));
+        save.setOnAction(event -> viewModel.save(textArea.getText()));
         save.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY));
         return save;
     }
 
-    private MenuItem createSaveAsItem(Stage stage) {
+    private MenuItem createSaveAsItem() {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
+        fileChooser.getExtensionFilters().add(extensionFilter);
+        Path savePathFile = fileChooser.showSaveDialog(null).toPath();
         MenuItem saveAs = new MenuItem("Save as...");
-        saveAs.setOnAction(event -> viewModel.saveAs(stage, textArea.getText()));
+        saveAs.setOnAction(event -> viewModel.saveAs(savePathFile, textArea.getText()));
         return saveAs;
     }
 

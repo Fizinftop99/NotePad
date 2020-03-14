@@ -15,40 +15,35 @@ import static java.lang.System.lineSeparator;
 public class NotePadViewModel {
     private Path currentPath;
 
-    void save(Stage stage, String savedText) {
+    void save(String savedText) {
         if (currentPath != null) {
             FileManager.save(currentPath, savedText);
         } else {
-            saveAs(stage, savedText);
+            saveAs(currentPath, savedText);
         }
     }
 
-    void saveAs(Stage stage, String savedText) {
-        FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
-        fileChooser.getExtensionFilters().add(extensionFilter);
-        File openedFile = fileChooser.showSaveDialog(stage);
-        if (openedFile != null) {
-            currentPath = openedFile.toPath();
+    void saveAs(Path path, String savedText) {
+        if (path != null) {
+            currentPath = path;
             FileManager.save(currentPath, savedText.replaceAll("\n", lineSeparator()));
         }
-        stage.setTitle(fileName());
     }
 
     Optional<List<String>> open(Stage stage) {
         FileChooser fileChooser = new FileChooser();
-            File openedFile = fileChooser.showOpenDialog(stage);
-            if (openedFile != null) {
-                currentPath = openedFile.toPath();
-                List<String> loggedText;
-                try {
-                    loggedText = FileManager.readPath(currentPath);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-                stage.setTitle(fileName());
-                return Optional.of(loggedText);
+        File openedFile = fileChooser.showOpenDialog(stage);
+        if (openedFile != null) {
+            currentPath = openedFile.toPath();
+            List<String> loggedText;
+            try {
+                loggedText = FileManager.readPath(currentPath);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
+            stage.setTitle(fileName());
+            return Optional.of(loggedText);
+        }
         return Optional.empty();
     }
 
