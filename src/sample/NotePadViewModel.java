@@ -4,6 +4,8 @@ import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -13,48 +15,47 @@ import static java.lang.System.lineSeparator;
 public class NotePadViewModel {
     private Stage stage;
     private Path currentFile;
-    private TextArea textArea;
     private List<String> loggedText;
 
     public NotePadViewModel(Stage stage) {
         this.stage = stage;
     }
 
-    void save() {
+    void save(String savedText) {
         if (currentFile != null) {
-            FileManager.save(currentFile, textArea.getText());
-            //logText();
+            FileManager.save(currentFile, savedText);
         } else {
-            saveAs();
+            saveAs(savedText);
         }
     }
 
-    void saveAs() {
+    void saveAs(String savedText) {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
         fileChooser.getExtensionFilters().add(extensionFilter);
         Path openedFile = fileChooser.showSaveDialog(stage).toPath();
         if (openedFile != null) {
             currentFile = openedFile;
-            FileManager.save(currentFile, textArea.getText().replaceAll("\n", lineSeparator()));
+            FileManager.save(currentFile, savedText.replaceAll("\n", lineSeparator()));
         }
         updateTitle();
-        updateCondition();
     }
 
     Optional<List<String>> open() {
         FileChooser fileChooser = new FileChooser();
         Path openedFile = fileChooser.showOpenDialog(stage).toPath();
         if (openedFile != null) {
-            //System.out.println("RRReaded");
             currentFile = openedFile;
-            loggedText = FileManager.readPath(currentFile);
+            try {
+                loggedText = FileManager.readPath(currentFile);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
             updateTitle();
             return Optional.of(loggedText);
         }
         return Optional.empty();
     }
-
 
     void updateTitle() {
         stage.setTitle(fileName() + " — Блокнот");
@@ -65,10 +66,5 @@ public class NotePadViewModel {
             return "Безымянный";
         }
         return currentFile.getFileName().toString();
-    }
-
-    private void updateCondition() {
-        //logText();
-        updateTitle();
     }
 }

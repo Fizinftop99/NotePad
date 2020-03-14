@@ -19,6 +19,7 @@ public class NotePadView extends VBox {
     private NotePadViewModel viewModel;
     private MenuBar menuBar;
     private TextArea textArea;
+
     public NotePadView(NotePadViewModel viewModel) {
         this.viewModel = viewModel;
         textArea = new TextArea();
@@ -35,7 +36,7 @@ public class NotePadView extends VBox {
 
     private MenuItem createNewItem() {
         MenuItem create = new MenuItem("New");
-        create.setOnAction(event -> viewModel.save());
+        create.setOnAction(event -> viewModel.save(textArea.getText()));
         create.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_ANY));
         return create;
     }
@@ -54,14 +55,14 @@ public class NotePadView extends VBox {
 
     private MenuItem createSaveItem() {
         MenuItem save = new MenuItem("Save");
-        save.setOnAction(event -> viewModel.save());
+        save.setOnAction(event -> viewModel.save(textArea.getText()));
         save.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY));
         return save;
     }
 
     private MenuItem createSaveAsItem() {
         MenuItem saveAs = new MenuItem("Save as...");
-        saveAs.setOnAction(event -> viewModel.saveAs());
+        saveAs.setOnAction(event -> viewModel.saveAs(textArea.getText()));
         return saveAs;
     }
 
