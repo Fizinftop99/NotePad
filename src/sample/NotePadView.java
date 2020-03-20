@@ -9,7 +9,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -20,8 +20,10 @@ import static java.lang.System.lineSeparator;
 public class NotePadView extends VBox {
     private NotePadViewModel viewModel;
     private TextArea textArea;
+    private Stage stage;
 
-    public NotePadView(NotePadViewModel viewModel) {
+    public NotePadView(NotePadViewModel viewModel, Stage stage) {
+        this.stage = stage;
         this.viewModel = viewModel;
         textArea = new TextArea();
         MenuBar menuBar = initMenuBar();
@@ -37,8 +39,9 @@ public class NotePadView extends VBox {
 
     private MenuItem createOpenItem() {
         MenuItem open = new MenuItem("Open...");
+        Path openFilePath = FileManager.choosePath(stage, true);
         open.setOnAction(actionEvent -> {
-            Optional<List<String>> optionalStrings = viewModel.open();
+            Optional<List<String>> optionalStrings = viewModel.open(openFilePath);
             if (optionalStrings.isEmpty())
                 return;
             refill(optionalStrings.get());
@@ -55,12 +58,9 @@ public class NotePadView extends VBox {
     }
 
     private MenuItem createSaveAsItem() {
-        FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
-        fileChooser.getExtensionFilters().add(extensionFilter);
-        Path savePathFile = fileChooser.showSaveDialog(null).toPath();
         MenuItem saveAs = new MenuItem("Save as...");
-        saveAs.setOnAction(event -> viewModel.saveAs(savePathFile, textArea.getText()));
+        Path saveFilePath = FileManager.choosePath(stage, false);
+        saveAs.setOnAction(event -> viewModel.saveAs(saveFilePath, textArea.getText()));
         return saveAs;
     }
 

@@ -1,9 +1,5 @@
 package sample;
 
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -19,7 +15,7 @@ public class NotePadViewModel {
         if (currentPath != null) {
             FileManager.save(currentPath, savedText);
         } else {
-            saveAs(currentPath, savedText);
+            saveAs(null, savedText);
         }
     }
 
@@ -30,27 +26,17 @@ public class NotePadViewModel {
         }
     }
 
-    Optional<List<String>> open(Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        File openedFile = fileChooser.showOpenDialog(stage);
-        if (openedFile != null) {
-            currentPath = openedFile.toPath();
+    Optional<List<String>> open(Path path) {
+        if (path != null) {
+            currentPath = path;
             List<String> loggedText;
             try {
                 loggedText = FileManager.readPath(currentPath);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            stage.setTitle(fileName());
             return Optional.of(loggedText);
         }
         return Optional.empty();
-    }
-
-    private String fileName() {
-        if (currentPath == null) {
-            return "NoName";
-        }
-        return currentPath.getFileName().toString();
     }
 }

@@ -27,8 +27,13 @@ public class FileManager {
         return readLines;
     }
 
-    public static File chooseOpenFile(Stage stage) {
+    public static Path choosePath(Stage stage, boolean openOrSave) {
         FileChooser fileChooser = new FileChooser();
-        return fileChooser.showOpenDialog(stage);
+        FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
+        fileChooser.getExtensionFilters().add(extensionFilter);
+        if (openOrSave)
+            return fileChooser.showOpenDialog(stage).toPath();
+        else
+            return fileChooser.showSaveDialog(stage).toPath();
     }
 }

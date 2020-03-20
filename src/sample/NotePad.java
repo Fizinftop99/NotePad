@@ -7,9 +7,9 @@ import javafx.stage.Stage;
 public class NotePad extends Application {
     @Override
     public void start(Stage primaryStage) {
-        //NotePadViewModel viewModel = new NotePadViewModel();
-        //NotePadView notePadView = new NotePadView(viewModel);
-        primaryStage.setScene(new Scene(new NotePadView(new NotePadViewModel()), 640, 480));
+        NotePadViewModel viewModel = new NotePadViewModel();
+        NotePadView view = new NotePadView(viewModel, primaryStage);
+        primaryStage.setScene(new Scene(view, 640, 480));
         primaryStage.show();
     }
 }
