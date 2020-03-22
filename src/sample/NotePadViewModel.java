@@ -1,7 +1,5 @@
 package sample;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -30,11 +28,7 @@ public class NotePadViewModel {
         if (path != null) {
             currentPath = path;
             List<String> loggedText;
-            try {
-                loggedText = FileManager.readPath(currentPath);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            loggedText = FileManager.readPath(currentPath);
             return Optional.of(loggedText);
         }
         return Optional.empty();

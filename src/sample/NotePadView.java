@@ -9,6 +9,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.nio.file.Path;
@@ -26,12 +27,12 @@ public class NotePadView extends VBox {
         this.stage = stage;
         this.viewModel = viewModel;
         textArea = new TextArea();
-        MenuBar menuBar = initMenuBar();
+        MenuBar menuBar = createMenuBar();
         getChildren().addAll(menuBar, textArea);
         VBox.setVgrow(textArea, Priority.ALWAYS);
     }
 
-    private MenuBar initMenuBar() {
+    private MenuBar createMenuBar() {
         Menu file = new Menu("File");
         file.getItems().addAll(createOpenItem(), createSaveItem(), createSaveAsItem());
         return new MenuBar(file);
@@ -39,12 +40,17 @@ public class NotePadView extends VBox {
 
     private MenuItem createOpenItem() {
         MenuItem open = new MenuItem("Open...");
-        Path openFilePath = FileManager.choosePath(stage, true);
-        open.setOnAction(actionEvent -> {
-            Optional<List<String>> optionalStrings = viewModel.open(openFilePath);
-            if (optionalStrings.isEmpty())
-                return;
-            refill(optionalStrings.get());
+        open.setOnAction(event -> {
+            Optional<Path> openFilePath = choosePath(true);
+            if(openFilePath.isPresent()) {
+                Optional<List<String>> optionalStrings = viewModel.open(openFilePath.get());
+                if (optionalStrings.isEmpty())
+                    return;
+                textArea.clear();
+                for (String line : optionalStrings.get()) {
+                    textArea.appendText(line + lineSeparator());
+                }
+            }
         });
         open.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_ANY));
         return open;
@@ -59,15 +65,18 @@ public class NotePadView extends VBox {
 
     private MenuItem createSaveAsItem() {
         MenuItem saveAs = new MenuItem("Save as...");
-        Path saveFilePath = FileManager.choosePath(stage, false);
-        saveAs.setOnAction(event -> viewModel.saveAs(saveFilePath, textArea.getText()));
+        saveAs.setOnAction(event -> choosePath(false).ifPresent(path -> viewModel.saveAs(path, textArea.getText())));
+        saveAs.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_ANY));
         return saveAs;
     }
 
-    private void refill(List<String> contents) {
-        textArea.clear();
-        for (String line : contents) {
-            textArea.appendText(line + lineSeparator());
-        }
+    private Optional<Path> choosePath(boolean openOrSave) {
+        FileChooser fileChooser = new FileChooser();
+        //FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
+        //fileChooser.getExtensionFilters().add(extensionFilter);
+        if (openOrSave)
+            return Optional.ofNullable(fileChooser.showOpenDialog(stage).toPath());
+        else
+            return Optional.ofNullable(fileChooser.showSaveDialog(stage).toPath());
     }
 }
