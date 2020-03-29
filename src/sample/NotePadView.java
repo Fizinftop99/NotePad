@@ -1,5 +1,7 @@
 package sample;
 
+import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -9,9 +11,12 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -35,15 +40,36 @@ public class NotePadView extends VBox {
     private MenuBar createMenuBar() {
         Menu file = new Menu("File");
         file.getItems().addAll(createOpenItem(), createSaveItem(), createSaveAsItem());
-        return new MenuBar(file);
+        Menu help = new Menu("Help");
+        help.getItems().add(createHelpItem());
+        return new MenuBar(file, help);
+    }
+
+    private MenuItem createHelpItem() {
+        MenuItem help = new MenuItem("Help");
+        help.setOnAction(event -> {
+            Stage newStage = new Stage();
+            newStage.initOwner(stage);
+            newStage.initModality(Modality.WINDOW_MODAL);
+            Text text = new Text("Sink or swim. Use your bootstraps.");
+            text.setLayoutY(15);
+            Group group = new Group(text);
+            Scene scene = new Scene(group);
+            newStage.setScene(scene);
+            newStage.setTitle("Help");
+            newStage.setWidth(300);
+            newStage.setHeight(300);
+            newStage.show();
+        });
+        return help;
     }
 
     private MenuItem createOpenItem() {
         MenuItem open = new MenuItem("Open...");
         open.setOnAction(event -> {
-            Optional<Path> openFilePath = choosePath(true);
-            if(openFilePath.isPresent()) {
-                Optional<List<String>> optionalStrings = viewModel.open(openFilePath.get());
+            Optional<File> openFile = chooseFile(true);
+            if(openFile.isPresent()) {
+                Optional<List<String>> optionalStrings = viewModel.open(openFile.get().toPath());
                 if (optionalStrings.isEmpty())
                     return;
                 textArea.clear();
@@ -65,18 +91,18 @@ public class NotePadView extends VBox {
 
     private MenuItem createSaveAsItem() {
         MenuItem saveAs = new MenuItem("Save as...");
-        saveAs.setOnAction(event -> choosePath(false).ifPresent(path -> viewModel.saveAs(path, textArea.getText())));
-        saveAs.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_ANY));
+        saveAs.setOnAction(event ->
+                chooseFile(false).ifPresent(file ->
+                        viewModel.saveAs(file.toPath(), textArea.getText())));
+        saveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_ANY, KeyCombination.SHIFT_ANY));
         return saveAs;
     }
 
-    private Optional<Path> choosePath(boolean openOrSave) {
+    private Optional<File> chooseFile(boolean openOrSave) {
         FileChooser fileChooser = new FileChooser();
-        //FileChooser.ExtensionFilter extensionFilter = new FileChooser.ExtensionFilter("Txt files", "*.txt");
-        //fileChooser.getExtensionFilters().add(extensionFilter);
         if (openOrSave)
-            return Optional.ofNullable(fileChooser.showOpenDialog(stage).toPath());
+            return Optional.ofNullable(fileChooser.showOpenDialog(stage));
         else
-            return Optional.ofNullable(fileChooser.showSaveDialog(stage).toPath());
+            return Optional.ofNullable(fileChooser.showSaveDialog(stage));
     }
 }
